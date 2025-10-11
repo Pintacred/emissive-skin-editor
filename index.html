@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Emissive Skin Editor v0.4.1</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="./icon.png">
+    <script type="importmap">
+    {
+        "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.module.js"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <img src="./Assets/steve_default.png" id="steveDefault" style="display: none;">
+    <img src="./Assets/alex_default.png" id="alexDefault" style="display: none;">
+
+    <h1>Emissive Skin Editor <span style="color: #ace280; font-size: 14px;">v0.4.1</span></h1>
+    <div class="row">
+        <div class="centerAlign">
+            <div class="leftSide">
+                <button type="button" class="squareBtn" id="buttonDrawGlow" title="Draw glow"></button>
+                <br><br>
+                <button type="button" class="squareBtn" id="buttonEraseGlow" title="Erase glow"></button>
+                <br><br>
+                <div style="display: none">
+                    <div>
+                        <button type="button" class="squareBtn" id="buttonUndo"
+                            title="Undo (doesn't work, will be fixed next update)"></button>
+                        <p id="numOfUndos">0</p>
+                    </div>
+                    <br><br>
+                    <div>
+                        <button type="button" class="squareBtn" id="buttonRedo"
+                            title="Redo (doesn't work, will be fixed next update)"></button>
+                        <p id="numOfRedos">0</p>
+                    </div>
+                    <br><br>
+                </div>
+                <button type="button" class="squareBtn" id="buttonResetEmissiveMap"
+                    title="Reset/clear emissive map"></button>
+                <br><br>
+                <button type="button" class="squareBtn" id="buttonResetCamPos"
+                    title="Reset camera position and angle"></button>
+            </div>
+            <div class="middleSide">
+                <!-- renderer -->
+                <canvas class="webgl" width="600" height="600"></canvas>
+            </div>
+            <div class="rightSide">
+                <label for="cameraLighting">Camera Light Brightness:</label><br>
+                <input class="sliderLighting" id="cameraLighting" name="cameraLighting" type="range"
+                    style="width: 100px;" min="0" max="1" step="0.01" value="0.72">
+                <br><br>
+                <label for="roomBrightness">Room Brightness:</label><br>
+                <input class="sliderLighting" id="roomBrightness" name="roomBrightness" type="range"
+                    style="width: 100px;" min="0" max="1" step="0.01" value="0.08">
+                <br><br>
+                <label for="checkboxGrids">Toggle Grid Guides:</label>
+                <div id="checkboxGrids">
+                    <input type="checkbox" id="checkboxGridInner" name="checkboxGridInner">
+                    <label for="checkboxGridInner">Inner Layer Grid</label>
+                    <br>
+                    <input type="checkbox" id="checkboxGridOuter" name="checkboxGridOuter" checked>
+                    <label for="checkboxGridOuter">Outer Layer Grid</label>
+                </div>
+
+                <br>
+                <select name="armModeSelection" id="armModeSelection">
+                    <option value="wide">Wide Arms (4px)</option>
+                    <option value="thin">Thin Arms (3px)</option>
+                </select>
+                <br><br>
+                <label for="layers">Toggle Body Parts:</label>
+                <div id="layers">
+                    <div class="layers2">
+                        <form id="layersInner">
+                            <input type="checkbox" id="checkboxHead" name="checkboxHead" value="Head" checked>
+                            <label for="checkboxHead">Head</label><br>
+
+                            <input type="checkbox" id="checkboxBody" name="checkboxBody" value="Body" checked>
+                            <label for="checkboxBody">Body</label><br>
+
+                            <input type="checkbox" id="checkboxArmRight" name="checkboxArmRight" value="ArmRight"
+                                checked>
+                            <label for="checkboxArmRight">Right Arm</label><br>
+
+                            <input type="checkbox" id="checkboxArmLeft" name="checkboxArmLeft" value="ArmLeft" checked>
+                            <label for="checkboxArmLeft">Left Arm</label><br>
+
+                            <input type="checkbox" id="checkboxLegRight" name="checkboxLegRight" value="LegRight"
+                                checked>
+                            <label for="checkboxLegRight">Right Leg</label><br>
+
+                            <input type="checkbox" id="checkboxLegLeft" name="checkboxLegLeft" value="LegLeft" checked>
+                            <label for="checkboxLegLeft">Left Leg</label><br>
+                        </form>
+                    </div>
+                    <div class="layers2">
+                        <form id="layersOuter">
+                            <input type="checkbox" id="checkboxHat" name="checkboxHat" value="Hat" checked>
+                            <label for="checkboxHat">Hat</label><br>
+
+                            <input type="checkbox" id="checkboxJacket" name="checkboxJacket" value="Jacket" checked>
+                            <label for="checkboxJacket">Jacket</label><br>
+
+                            <input type="checkbox" id="checkboxSleeveRight" name="checkboxSleeveRight"
+                                value="SleeveRight" checked>
+                            <label for="checkboxSleeveRight">Right Sleeve</label><br>
+
+                            <input type="checkbox" id="checkboxSleeveLeft" name="checkboxSleeveLeft" value="SleeveLeft"
+                                checked>
+                            <label for="checkboxSleeveLeft">Left Sleeve</label><br>
+
+                            <input type="checkbox" id="checkboxPantsRight" name="checkboxPantsRight" value="PantsRight"
+                                checked>
+                            <label for="checkboxPantsRight">Right Pants</label><br>
+
+                            <input type="checkbox" id="checkboxPantsLeft" name="checkboxPantsLeft" value="PantsLeft"
+                                checked>
+                            <label for="checkboxPantsLeft">Left Pants</label><br>
+                        </form>
+                    </div>
+                </div>
+                <br>
+                <label for="inputSkin">Upload Skin:</label><br>
+                <input id="inputSkin" type="file" accept="image/png" required autocomplete="off">
+                <br><br>
+                <label for="inputEmissive">Upload Emissive Map (Optional):</label>
+                <br>
+                <input id="inputEmissive" type="file" accept="image/png" required autocomplete="off">
+                <br><br>
+                <button id="downloadBtn">Download resource pack</button>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h2>How to use:</h2>
+        <p>Left click to move around.</p>
+        <p>Right click to pan around.</p>
+        <p>Scroll to zoom in/zoom out.</p>
+    </div>
+
+    <!-- <script src="./dist/jszip.min.js" defer></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script> -->
+    <script type="module" src="./main.js" defer></script>
+    <script type="module" src="./download.js" defer></script>
+</body>
+
+</html>

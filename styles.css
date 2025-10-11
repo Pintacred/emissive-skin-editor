@@ -1,0 +1,127 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #dcdcdc;
+    background-color: #262627;
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+.webgl {
+    border: solid;
+    border-radius: 8px;
+    background-color: #141414;
+    background-image: url(failedToLoad.png);
+    background-size: cover;
+    /* box-shadow: 0px 0px 10px white; */
+    /* cursor: crosshair; */
+}
+
+.squareBtn {
+    width: 64px;
+    height: 64px;
+    border: none;
+    border-radius: 8px;
+}
+
+.row {
+    display: flex;
+
+}
+
+.leftSide,
+.rightSide {
+    justify-content: center;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.middleSide {
+    display: flex;
+    flex-direction: column;
+    /* stack children vertically */
+    align-items: center;
+    /* horizontally center the children */
+    text-align: center;
+    /* center inline content like label text */
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.centerAlign {
+    display: flex;
+    /* Enables flexbox */
+    flex-direction: row;
+    /* Arrange children side-by-side in a row */
+    justify-content: center;
+    /* Optional: space columns evenly */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#buttonDrawGlow {
+    background: url(Assets/brush_icon.png);
+}
+
+#buttonEraseGlow {
+    background: url(Assets/eraser_icon.png);
+}
+
+#buttonUndo {
+    background: url(Assets/undo_btn.png);
+}
+
+#buttonRedo {
+    background: url(Assets/redo_btn.png);
+}
+
+#buttonResetEmissiveMap {
+    background: url(Assets/resetEmissiveMap_icon.png);
+}
+
+#buttonResetCamPos {
+    background: url(Assets/resetCam.png);
+}
+
+#buttonDrawGlow,
+#buttonEraseGlow,
+#buttonToggleGrid,
+#buttonUndo,
+#buttonRedo,
+#buttonResetEmissiveMap,
+#buttonResetCamPos {
+    background-size: cover;
+    image-rendering: pixelated;
+    background-color: #E9E9ED;
+}
+
+#buttonDrawGlow:hover,
+#buttonEraseGlow:hover,
+#buttonToggleGrid:hover,
+#buttonUndo:hover,
+#buttonRedo:hover,
+#buttonResetEmissiveMap:hover,
+#buttonResetCamPos:hover {
+    background-color: #D0D0D7;
+    transition: 0.1s;
+}
+
+.button-active {
+  background-color: #989898 !important;
+}
+
+#layers {
+    display: flex;
+    flex-direction: row;
+}
+
+.layers2 {
+    margin-right: 20px;
+}
+#numOfUndos, #numOfRedos {
+    border: solid;
+    margin: auto;
+}
+
+button, input {
+    cursor: pointer;
+}
