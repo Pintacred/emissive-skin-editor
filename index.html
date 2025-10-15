@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Emissive Skin Editor v0.4.1</title>
+    <title>Emissive Skin RP Editor</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="./icon.png">
     <script type="importmap">
@@ -18,30 +18,40 @@
 
 <body>
     <img src="./Assets/steve_default.png" id="steveDefault" style="display: none;">
-    <img src="./Assets/alex_default.png" id="alexDefault" style="display: none;">
 
-    <h1>Emissive Skin Editor <span style="color: #ace280; font-size: 14px;">v0.4.1</span></h1>
+    <div style="display: flex;">
+        <div style="width: 50%;">
+            <h1 style="margin: auto;">Emissive Skin Resource Pack Editor <span
+                    style="color: #ace280; font-size: 14px;">v1.0.0</span></h1>
+            <h4 style="margin: auto;">for Bedrock Edition only</h4>
+        </div>
+        <div style="width: 50%; text-align: right;">
+            <a href="https://github.com/Pintacred/emissive-skin-editor" style="color: #ace280;">> check out the source code</a>
+        </div>
+    </div>
+
     <div class="row">
         <div class="centerAlign">
             <div class="leftSide">
-                <button type="button" class="squareBtn" id="buttonDrawGlow" title="Draw glow"></button>
+                <button type="button" class="squareBtn" id="buttonDrawGlow" title="Draw glow (1)"></button>
                 <br><br>
-                <button type="button" class="squareBtn" id="buttonEraseGlow" title="Erase glow"></button>
-                <br><br>
-                <div style="display: none">
+                <button type="button" class="squareBtn" id="buttonEraseGlow" title="Erase glow (2)"></button>
+                <br><hr>
+                
+                <div>
                     <div>
                         <button type="button" class="squareBtn" id="buttonUndo"
-                            title="Undo (doesn't work, will be fixed next update)"></button>
+                            title="Undo (ctrl + Z)"></button>
                         <p id="numOfUndos">0</p>
                     </div>
-                    <br><br>
+                    <br>
                     <div>
                         <button type="button" class="squareBtn" id="buttonRedo"
-                            title="Redo (doesn't work, will be fixed next update)"></button>
+                            title="Redo (ctrl + Y)"></button>
                         <p id="numOfRedos">0</p>
                     </div>
-                    <br><br>
                 </div>
+                <hr>
                 <button type="button" class="squareBtn" id="buttonResetEmissiveMap"
                     title="Reset/clear emissive map"></button>
                 <br><br>
@@ -50,7 +60,15 @@
             </div>
             <div class="middleSide">
                 <!-- renderer -->
-                <canvas class="webgl" width="600" height="600"></canvas>
+                <div style="position: relative; width: 600px; height: 600px;">
+                    <canvas class="layeredCanvas" width="600" height="600"
+                        style="background-image: url(Assets/checkerboard_bg_dark.png);"></canvas>
+
+                    <canvas class="layeredCanvas" id="lightCheckerboardCanvas" width="600" height="600"
+                        style="background-image: url(Assets/checkerboard_bg_light.png);"></canvas>
+
+                    <canvas class="layeredCanvas webgl" width="600" height="600"></canvas>
+                </div>
             </div>
             <div class="rightSide">
                 <label for="cameraLighting">Camera Light Brightness:</label><br>
@@ -140,16 +158,28 @@
         </div>
     </div>
 
-    <div>
-        <h2>How to use:</h2>
-        <p>Left click to move around.</p>
-        <p>Right click to pan around.</p>
-        <p>Scroll to zoom in/zoom out.</p>
-    </div>
+    <br>
+    <hr>
 
-    <!-- <script src="./dist/jszip.min.js" defer></script> -->
+
+    <h2>What is this for?</h2>
+    <p>
+        This editor is for Emissive Skin Resource Pack for Bedrock Edition (created by me, Pintacred).
+    </p>
+
+    <h2>How to Use:</h2>
+    <p>
+        Movement: Left-click to rotate around the model. Right click to pan around it. Scroll to zoom.
+        <br>
+        After you're done editing, download the mcpack and apply it to Bedrock Edition and select what arm
+        type to use.
+    </p>
+    <p>
+        Sadly it is not compatible with other resource packs that also use the player entity file.
+    </p>
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script> -->
     <script type="module" src="./main.js" defer></script>
     <script type="module" src="./download.js" defer></script>
 </body>

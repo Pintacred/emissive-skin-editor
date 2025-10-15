@@ -502,7 +502,7 @@ function createTheWholeThing(canvas) {
             "format_version": 2,
             "header": {
                 "description": "Makes parts of your skin glow like enderman eyes.\\n\\nMade by Pintacred.",
-                "name": "Emissive Player Skin (v0.41)",
+                "name": "Emissive Player Skin (v1.0.0)",
                 "uuid": "${crypto.randomUUID()}",
                 "version": [ 0, 0, 1],
                 "min_engine_version": [ 1, 21, 0 ]

@@ -4,7 +4,8 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.148.0/exampl
 
 // ================================= SCENE SETUP ====================================================================
 
-const resolution = 2;  // --------------- TO BE INCLUDED AS HTML BUTTON LATER --------------- (or not)
+// increases the pixels of the renderer canvas by multiplying it by resolution
+const resolution = 2;
 
 // Renderer Setup
 const rendererCanvas = document.querySelector('.webgl');
@@ -16,16 +17,18 @@ rendererCanvas.style.height = viewportCanvas.height + 'px';
 const rendererWindowWidth = viewportCanvas.width * resolution;
 const rendererWindowHeight = viewportCanvas.height * resolution;
 
-const renderer = new THREE.WebGLRenderer({ canvas: rendererCanvas, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas: rendererCanvas, antialias: true, alpha: true });
 renderer.setSize(rendererWindowWidth, rendererWindowHeight, false);
-renderer.setClearColor("#141414");
+renderer.setClearColor("#000000", 0);
 
 const scene = new THREE.Scene();
 
+// Camera
 const camera = new THREE.OrthographicCamera(rendererWindowWidth / - 2, rendererWindowWidth / 2, rendererWindowHeight / 2, rendererWindowHeight / - 2, 0.1, 1000);
 camera.position.z = 100;
 camera.zoom = 16 * resolution;
 camera.updateProjectionMatrix();
+
 // Orbit Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.update();
@@ -48,13 +51,17 @@ buttonResetCamPos.addEventListener('click', function () {
     }
 });
 
+// Light
 const cameraLight = new THREE.DirectionalLight("white", 0.5);
 scene.add(cameraLight);
+const sliderCameraLighting = document.getElementById('cameraLighting');
+
 const ambientLight = new THREE.AmbientLight("white", 0.5)
 scene.add(ambientLight);
-
-const sliderCameraLighting = document.getElementById('cameraLighting');
 const sliderAmbientLighting = document.getElementById('roomBrightness');
+
+
+const lightCheckerboardCanvas = document.getElementById("lightCheckerboardCanvas");
 
 let camLtemp = 0, ambLtemp = 0;
 function updateLightIntensity() {
@@ -73,8 +80,12 @@ function updateLightIntensity() {
     ambientLight.intensity = ambLtemp;
 
     // "room" color now depends on brightness
-    const roomBrightness = String((Math.round(Number(sliderAmbientLighting.value) * 255)).toString(16)).padStart(2, '0');
-    renderer.setClearColor(`#${roomBrightness}${roomBrightness}${roomBrightness}`);
+    // const roomBrightness = String((Math.round(Number(sliderAmbientLighting.value) * 255)).toString(16)).padStart(2, '0');
+    // renderer.setClearColor(`#${roomBrightness}${roomBrightness}${roomBrightness}`, Math.abs(sliderAmbientLighting.value-1));
+
+    lightCheckerboardCanvas.style.opacity = sliderAmbientLighting.value**2;
+    const b = sliderCameraLighting.value * 64 + 20;
+    document.body.style.backgroundImage = `radial-gradient(rgba(${b}, ${b}, ${b}), rgba(20, 20, 20, 1))`;
 };
 updateLightIntensity();
 
@@ -110,12 +121,6 @@ function rectangularGridHelper(width, height, cols, rows, color) {
     return grid;
 }
 
-function showCanvasOnHTML(canvas) {
-    document.body.appendChild(canvas);
-    canvas.style.width = `${canvas.width * 16}px`;
-    canvas.style.height = `${canvas.height * 16}px`;
-}
-
 function pixelate(texture) { texture.magFilter = THREE.NearestFilter; texture.minFilter = THREE.NearestFilter; }
 
 // ================================= FUNCTIONS YOU SHOULDN'T TOUCH ==================================================
@@ -127,8 +132,8 @@ function correctUVMap(geometry, [textureWidth, textureHeight], [offsetX, offsetY
     const hgt = geometry.parameters.height;
     const wdh = geometry.parameters.depth;
 
-    const pixelSizeWidth = 1/textureWidth;
-    const pixelSizeHeight = 1/textureHeight;
+    const pixelSizeWidth = 1/textureWidth * skinRes;
+    const pixelSizeHeight = 1/textureHeight * skinRes;
 
     const offsetY = (textureHeight-offsetYtemp-wdh-hgt);
 
@@ -182,20 +187,6 @@ function correctUVMap(geometry, [textureWidth, textureHeight], [offsetX, offsetY
     // Inform Three.js that UVs were updated
     geometry.attributes.uv.needsUpdate = true;
 }
-
-// input: elementId          output: [texture, canvas, ctx]
-function loadTextureViaCanvas(elementId) {
-    const imageFile = document.getElementById(`${elementId}`);
-
-    const canvas = document.createElement('canvas');
-    canvas.width = imageFile.width; canvas.height = imageFile.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(imageFile, 0, 0, imageFile.width, imageFile.height, 0, 0, canvas.width, canvas.height);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    return [texture, canvas, ctx];
-}
-
 
 // inflates a cube like how blockbench does it
 function inflate(object, inflation) {
@@ -258,17 +249,19 @@ function invertColor(canvas) {
     ctx.globalCompositeOperation = 'source-over';
 }
 
-// ================================= PREPARING TEXTURES AND GEOMETRY ================================================
+// ================================= PREPARING TEXTURES =============================================================
+
+var skinRes = 1;  // my humble attempt at adding 128x skin support. After hours of trying, I conclude it's impossible. Sorry.
 
 let originalSkin = document.getElementById("steveDefault");
 
 const canvasOriginalSkin = document.createElement('canvas');
-canvasOriginalSkin.width = 64; canvasOriginalSkin.height = 64;
+canvasOriginalSkin.width = 64 * skinRes; canvasOriginalSkin.height = 64 * skinRes;
 const ctxOriginalSkin = canvasOriginalSkin.getContext("2d");
 ctxOriginalSkin.drawImage(originalSkin, 0, 0);
 
 const canvasEmissiveMap = document.createElement('canvas');
-canvasEmissiveMap.width = 64; canvasEmissiveMap.height = 64;
+canvasEmissiveMap.width = 64 * skinRes; canvasEmissiveMap.height = 64 * skinRes;
 const ctxEmissiveMap = canvasEmissiveMap.getContext("2d");
 ctxEmissiveMap.fillStyle = "black";
 ctxEmissiveMap.fillRect(0, 0, canvasEmissiveMap.width, canvasEmissiveMap.height);
@@ -641,7 +634,7 @@ armMode.addEventListener('change', () => {
 });
 // **************************************************************************************** / / /
 
-// ================================= MISCALLANEOUS/TESTING/EXPERIMENTAL CODE ========================================
+// ================================= MOUSE CONTROLS AND PAINTING ====================================================
 
 const divSetLayersVisible = document.getElementById('layers');
 divSetLayersVisible.addEventListener('change', findAllObjects);
@@ -661,8 +654,9 @@ findAllObjects();
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-//  Detection for when the user is painting or not, and activates isPainting depending on the state
+//  Detection for when the user is painting/moving, and activates isPainting and changes cursor style depending on the state
 let isPainting = false;
+let isMoving = false;
 
 renderer.domElement.addEventListener('mousedown', (event) => {
     const rect = rendererCanvas.getBoundingClientRect();
@@ -672,23 +666,18 @@ renderer.domElement.addEventListener('mousedown', (event) => {
 
     raycaster.setFromCamera(mouse, camera);
 
-    // Intersect with all objects in scene
     const intersects = raycaster.intersectObjects(objectArray);
 
     if (intersects.length > 0) {
         controls.enabled = false;
         paintAtEvent(event);
         isPainting = true;
-    }
+        isMoving = false;
+    } else {
+        isPainting = false;
+        isMoving = true;
+    };
 });
-
-var mouseDown = 0;
-document.body.onmousedown = function() { 
-  ++mouseDown;
-}
-document.body.onmouseup = function() {
-  --mouseDown;
-}
 
 renderer.domElement.addEventListener('mousemove', (event) => {
     const rect = rendererCanvas.getBoundingClientRect();
@@ -700,31 +689,30 @@ renderer.domElement.addEventListener('mousemove', (event) => {
 
     const intersects = raycaster.intersectObjects(objectArray);
 
-    if (intersects.length > 0) {
+    if (intersects.length > 0 && !isMoving) {
         rendererCanvas.style.cursor = "crosshair";
     }
     else {
-        if (!mouseDown) rendererCanvas.style.cursor = "grab";
-        else if (mouseDown) rendererCanvas.style.cursor = "grabbing";
+        rendererCanvas.style.cursor = "move";
     };
 
     if (!isPainting) return;
     paintAtEvent(event);
 });
 
-const numOfUndos = document.getElementById('numOfUndos');
-
 renderer.domElement.addEventListener('mouseup', (event) => {
     controls.enabled = true;
-    isPainting = false;
 
-    if (drawHistory.length > 0) {
-        updatePastHistory(drawHistory);
-        drawHistory = [];
-    }
-    numOfUndos.innerHTML = actionHistoryPast.length;
-    rendererCanvas.style.cursor = "grab";
+    // clear actionHistoryFuture when you paint because uhh, obvious reasons
+    if (isPainting) actionHistoryFuture = [];
+
+    isPainting = false;
+    isMoving = false;
+
+    rendererCanvas.style.cursor = "move";
     // console.log("overallArray:", actionHistoryPast);
+
+    doFilterArray();
 });
 
 
@@ -769,39 +757,180 @@ function paintOnTexture(uv) {
     textureSkinBase.needsUpdate = true;
     textureSkinGlow.needsUpdate = true;
     
-    tempList.push(`[x: ${x}, y: ${y}, newColor: ${ctxEmissiveMap.fillStyle}, oldColor: ${hex}]`);
-    drawHistory = [...new Set(tempList)];
+    tempArray.push([x, y, ctxEmissiveMap.fillStyle, hex]);
 }
 
-let tempList = [];
-let drawHistory = [];
+// === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY ===
+// === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY ===
+// === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY ===
+// === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY ===
+// === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY ===
+// === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY ===
+// === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY ===
+// === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY === LOGIC ON UNDO HISTORY ===
+
+let tempArray = [];
 let actionHistoryPast = [];
 let actionHistoryFuture = [];  // I'll add functionality to this later
 
-function updatePastHistory(drawHistory) {
-    actionHistoryPast.push(drawHistory);
-    tempList = [];
-    drawHistory = [];
+// ================================= BUTTONS ========================================================================
+
+function doFilterArray() {
+    const seen = new Set();
+    let tempArray2 = tempArray.filter(subArray => {
+        const key = subArray.slice(0, 3).join('|'); // Create a unique key using first 3 elements
+        if (seen.has(key)) {
+            return false; // Duplicate found, exclude
+        } else {
+            seen.add(key);
+            return true; // Unique, include
+        }
+    });
+
+    if (tempArray2.length > 0) {
+        actionHistoryPast.push(tempArray2);  // add to main array
+    }
+    tempArray = [];   // clear the temporary arrays
+    tempArray2 = [];
 }
 
-// ================================= MISCALLANEOUS/TESTING/EXPERIMENTAL CODE 2 ======================================
+
+// undo button
+function doUndo() {
+    // prevents adding of undefined elements and breaking of the undo system
+    if (actionHistoryPast[actionHistoryPast.length - 1] === undefined) {
+        console.log("undo invalid");
+        return;
+    } else {
+        // remove actionHistoryPast's last element and add it to actionHistoryFuture
+        drawFromHistory("past");
+        actionHistoryFuture.push(actionHistoryPast.pop());
+    };
+    updateAmountOfUndoRedo();
+};
+const undoBtn = document.getElementById('buttonUndo');
+undoBtn.addEventListener('click', doUndo);
+window.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 'z') {
+        e.preventDefault();
+        doUndo();
+    }
+})
+
+
+// redo button
+function doRedo() {
+    // prevents adding of undefined elements and breaking of the redo system
+    if (actionHistoryFuture[actionHistoryFuture.length - 1] === undefined) {
+        console.log("redo invalid");
+        return;
+    } else {
+        // remove actionHistoryFuture's last element and add it to actionHistoryPast
+        drawFromHistory("future");
+        actionHistoryPast.push(actionHistoryFuture.pop());
+    };
+    updateAmountOfUndoRedo();
+};
+const redoBtn = document.getElementById('buttonRedo');
+redoBtn.addEventListener('click', doRedo);
+window.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 'y') {
+        e.preventDefault();
+        doRedo();
+    }
+})
+
+
+const numOfUndos = document.getElementById('numOfUndos');
+const numOfRedos = document.getElementById('numOfRedos');
+
+document.addEventListener('mouseup', updateAmountOfUndoRedo);
+
+// Function for updating undo/redo (this function is only for visuals)
+function updateAmountOfUndoRedo() {
+    numOfUndos.innerHTML = actionHistoryPast.length;
+    numOfRedos.innerHTML = actionHistoryFuture.length;
+}
+
+
+function drawFromHistory(mode) {
+    if (mode === "past") {
+        // console.log("draw the past");
+        // console.log("actionHistoryPast:", actionHistoryPast);
+
+        let latestHistory = actionHistoryPast[actionHistoryPast.length - 1];
+        for (let i = 0; i < latestHistory.length; i++) {
+            let pixelX = latestHistory[i][0];  // X coord of affected pixel
+            let pixelY = latestHistory[i][1];  // Y coord of affected pixel
+            let newColor = latestHistory[i][2];
+            let oldColor = latestHistory[i][3];
+
+            // fill all the new colors with the old color, essentially overwriting it
+            ctxEmissiveMap.fillStyle = `${oldColor}`;
+            ctxEmissiveMap.fillRect(pixelX, pixelY, 1, 1);
+
+            // console.log(
+            //     `pixel location: (${pixelX}, ${pixelY})` + '\n',
+            //     `old: ${oldColor} -> new: ${newColor}`
+            // );
+        };
+    } else if (mode === "future") {
+        // console.log("draw the future");
+        // console.log("actionHistoryFuture:", actionHistoryFuture);
+
+        let latestFuture = actionHistoryFuture[actionHistoryFuture.length - 1];
+        for (let i = 0; i < latestFuture.length; i++) {
+            let pixelX = latestFuture[i][0];  // X coord of affected pixel
+            let pixelY = latestFuture[i][1];  // Y coord of affected pixel
+            let newColor = latestFuture[i][2];
+            let oldColor = latestFuture[i][3];
+
+            // fill all the old colors with the new color, essentially overwriting it
+            ctxEmissiveMap.fillStyle = `${newColor}`;
+            ctxEmissiveMap.fillRect(pixelX, pixelY, 1, 1);
+
+            // console.log(
+            //     `pixel location: (${pixelX}, ${pixelY})` + '\n',
+            //     `new: ${newColor} -> old: ${oldColor}`
+            // );
+        };
+    }
+
+    // final step, which recomputes canvasEmissiveMap so it properly updates
+    updateTextures();
+
+};
+
 
 // drawGlow/eraseGlow button toggles. Either you draw, or you erase.
 let drawGlow = true;
 
-const buttonDrawGlow = document.getElementById('buttonDrawGlow');
-
-buttonDrawGlow.addEventListener('click', function () {
+// activate draw glow
+function activateDraw() {
     drawGlow = true;
     buttonDrawGlow.classList.add('button-active');
     buttonEraseGlow.classList.remove('button-active');
+}
+const buttonDrawGlow = document.getElementById('buttonDrawGlow');
+buttonDrawGlow.addEventListener('click', activateDraw);
+window.addEventListener('keydown', function (e) {
+    if (e.key === '1') {
+        activateDraw();
+    }
 });
 
-const buttonEraseGlow = document.getElementById('buttonEraseGlow');
-buttonEraseGlow.addEventListener('click', function () {
+// activate erase glow
+function activateErase() {
     drawGlow = false;
     buttonEraseGlow.classList.add('button-active');
     buttonDrawGlow.classList.remove('button-active');
+}
+const buttonEraseGlow = document.getElementById('buttonEraseGlow');
+buttonEraseGlow.addEventListener('click', activateErase);
+window.addEventListener('keydown', function (e) {
+    if (e.key === '2') {
+        activateErase();
+    }
 });
 
 buttonDrawGlow.classList.add('button-active');
@@ -823,19 +952,19 @@ buttonResetEmissiveMap.addEventListener('click', function () {
 
 // ================================= "animate()" ALWAYS AT THE END OF THE CODE ======================================
 
-let jaja = 0;
+// let jaja = 0;
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
 
     // jaja += 0.1;
-    groupHead.rotation.set(0,jaja,0);
+    // groupHead.rotation.set(0,jaja,0);
     // camera light follows camera
     cameraLight.position.copy(camera.position);
 }
 animate();
 
-// ================================= EXPERIMENTAL CODE ==============================================================
+// ================================= IMPORT DATA ====================================================================
 
 window.sharedData = {canvas: canvasGlowMap};
