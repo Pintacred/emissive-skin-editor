@@ -33,7 +33,7 @@ downloadBtn.addEventListener('click', function () {
 	zip.generateAsync({ type: "blob" }).then(function (content) {
 		const link = document.createElement('a');
 		link.href = URL.createObjectURL(content);
-		link.download = "custom_emissive_skin_v0.41.mcpack";
+		link.download = "custom_emissive_skin_v1.0.0.mcpack";
 		link.click();
 	});
 });
@@ -533,3 +533,4 @@ function createTheWholeThing(canvas) {
 
 	return zip;
 }
+
