@@ -3,11 +3,23 @@
 const canvas = window.sharedData.canvas;
 const ctx = canvas.getContext('2d');
 
+
 const canvas2 = document.createElement('canvas');
 canvas2.id = 'canvas2';
 canvas2.width = 64; canvas2.height = 64;
 const ctx2 = canvas2.getContext('2d');
 // document.body.append(canvas2);
+
+
+const canvasToBePackIcon = window.sharedData.canvasToBePackIcon;
+
+const canvasPackIcon = document.createElement('canvas');
+canvasPackIcon.width = 8; canvasPackIcon.height = 8;
+const ctxPackIcon = canvasPackIcon.getContext('2d');
+
+
+const programVersion = window.sharedData.programVersion;
+
 
 const downloadBtn = document.getElementById('downloadBtn');
 downloadBtn.addEventListener('click', function () {
@@ -27,23 +39,35 @@ downloadBtn.addEventListener('click', function () {
 	}
 	ctx2.putImageData(imageData, 0, 0);
 
-	const zip = createTheWholeThing(canvas2);
+	ctxPackIcon.clearRect(0, 0, canvasPackIcon.width, canvasPackIcon.height);
+	ctxPackIcon.drawImage(canvasToBePackIcon, 8, 8, 8, 8, 0, 0, 8, 8);
+	ctxPackIcon.drawImage(canvasToBePackIcon, 40, 8, 8, 8, 0, 0, 8, 8);
+
+	// Generating a random 5-digit number so when people download them, the pack is easy to find, as every name will be unique
+	const packIdentification = Math.floor(Math.random() * 90000) + 10000;
+	// console.log(packIdentification);
+
+	const zip = createTheWholeThing(canvas2, canvasPackIcon, packIdentification);
 
 	// Generate and download
 	zip.generateAsync({ type: "blob" }).then(function (content) {
 		const link = document.createElement('a');
 		link.href = URL.createObjectURL(content);
-		link.download = "custom_emissive_skin_v1.0.0.mcpack";
+		link.download = `custom_emissive_skin_${programVersion}_${packIdentification}.mcpack`;
 		link.click();
 	});
 });
 
 
 // This part of the code is beyond horror
-function createTheWholeThing(canvas) {
+function createTheWholeThing(canvas, canvas2, packIdentification) {
 	// convert image to base64Data to be used in putting image in zip
 	const dataURL = canvas.toDataURL("image/png");
 	const base64Data = dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+
+	// converts
+	const dataURLPackIcon = canvas2.toDataURL("image/png");
+	const base64DataPackIcon = dataURLPackIcon.replace(/^data:image\/(png|jpg);base64,/, "");
 
 	// create new zip, then put all other contents
 	const zip = new JSZip();
@@ -496,34 +520,39 @@ function createTheWholeThing(canvas) {
 
 	zip.file("textures/entity/emissive_skin_texture.png", base64Data, { base64: true });
 
+
+	const description = `
+		Makes parts of your skin "glow" like enderman eyes.\\n\\nMade by Pintacred.\\n\\nID: ${packIdentification}.
+	`
+
 	zip.file("manifest.json",
 		`
         {
             "format_version": 2,
             "header": {
-                "description": "Makes parts of your skin glow like enderman eyes.\\n\\nMade by Pintacred.",
-                "name": "Emissive Player Skin (v1.0.0)",
+                "description": "${description}",
+                "name": "Emissive Player Skin (${programVersion})",
                 "uuid": "${crypto.randomUUID()}",
                 "version": [ 0, 0, 1],
                 "min_engine_version": [ 1, 21, 0 ]
             },
             "modules": [
                 {
-                    "description": "Makes parts of your skin glow like enderman eyes.\\n\\nMade by Pintacred.",
+                    "description": "${description}",
                     "type": "resources",
                     "uuid": "${crypto.randomUUID()}",
                     "version": [0, 0, 1  ]
                 }
             ],
             "subpacks": [
-                {
-                    "folder_name": "wide",
-                    "name": "Wide Arms (4x)",
+				{
+                    "folder_name": "slim",
+                    "name": "Slim Arms (3x)",
                     "memory_tier": 0
                 },
                 {
-                    "folder_name": "slim",
-                    "name": "Slim Arms (3x)",
+                    "folder_name": "wide",
+                    "name": "Wide Arms (4x)",
                     "memory_tier": 0
                 }
             ]
@@ -531,6 +560,7 @@ function createTheWholeThing(canvas) {
         `
 	);
 
+	zip.file("pack_icon.png", base64DataPackIcon, { base64: true });
+
 	return zip;
 }
-

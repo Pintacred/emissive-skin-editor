@@ -2,6 +2,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.m
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.148.0/examples/jsm/controls/OrbitControls.js';
 
 
+const programVersion = "v1.0.1";
+const websiteVerDisplay = document.getElementById('version');
+websiteVerDisplay.innerHTML = programVersion;
+
 // ================================= SCENE SETUP ====================================================================
 
 // increases the pixels of the renderer canvas by multiplying it by resolution
@@ -967,4 +971,8 @@ animate();
 
 // ================================= IMPORT DATA ====================================================================
 
-window.sharedData = {canvas: canvasGlowMap};
+window.sharedData = {
+    canvas: canvasGlowMap, 
+    canvasToBePackIcon: canvasOriginalSkin,
+    programVersion: programVersion
+};
