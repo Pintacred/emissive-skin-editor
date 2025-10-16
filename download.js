@@ -521,7 +521,7 @@ function createTheWholeThing(canvas, canvas2, packIdentification) {
 	zip.file("textures/entity/emissive_skin_texture.png", base64Data, { base64: true });
 
 
-	const description = `Makes parts of your skin \"glow\" like enderman eyes.\\n\\nMade by Pintacred.\\n\\nID: ${packIdentification}.`
+	const description = `Makes parts of your skin \\"glow\\" like enderman eyes.\\n\\nMade by Pintacred.\\n\\nID: ${packIdentification}.`
 
 	zip.file("manifest.json",
 		`
@@ -562,4 +562,5 @@ function createTheWholeThing(canvas, canvas2, packIdentification) {
 
 	return zip;
 }
+
 
